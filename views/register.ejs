@@ -1,14 +1,18 @@
 <%-include("partials/header.ejs")%> 
     <div class="heading">
         <h1>Register</h1>
-        <form action="" method="POST">
+        <form action="/register" method="POST">
             <div class="mb-3">
                 <label class="form-label" for="username">Username</label>
                 <input class="form-control" type="text" name="username" id="username">
             </div>
+            <div class="mb-3">
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control" type="email" name="email" id="email">
+            </div>
             <div class="mb-4">
                 <label class="form-label" for="password">Password</label>
-                <input class="form-control" type="text" name="username" id="username">
+                <input class="form-control" type="password" name="password" id="password">
             </div>
             <button class="btn btn-lg" type="submit">Register</button>
         </form>
