@@ -27,6 +27,10 @@
     color: #212629;
 }
 
+h1 {
+    margin-bottom: 2rem;
+}
+
 footer {
     color: #fff;
     padding: 1rem 0;

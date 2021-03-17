@@ -30,12 +30,12 @@ app.get("/", (req, res) => {
   })
 });
 
-app.get("/about", (req, res) => {
-  res.render("about.ejs");
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
 });
 
-app.get("/contact", (req, res) => {
-  res.render("contact.ejs");
+app.get("/register", (req, res) => {
+  res.render("register.ejs");
 });
 
 app.get("/compose", (req, res) => {
