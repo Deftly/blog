@@ -1,0 +1,14 @@
+<%- include("partials/header.ejs") %> 
+    <div class="heading">
+        <h1>Home</h1>
+        <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit illo id animi temporibus dolores laboriosam provident explicabo magnam eligendi sed? Tempore eos, voluptates optio iste neque placeat cumque harum corporis.
+        </p>
+        <% for(post of posts) { %>
+            <div class="post">
+                <h2><a class="nav-link" href="/posts/<%-post._id%> "><%-post.title%></a> </h2>
+            </div>
+        <% } %>
+    </div>
+    
+<%- include("partials/footer.ejs") %> 

@@ -1,0 +1,34 @@
+.navbar {
+    padding: 1rem 8rem;
+    letter-spacing: 5px;
+    font-size: 12px;
+}
+
+.nav-item {
+    margin: 0 .5rem;
+}
+
+.nav-link:hover {
+    color: #8164FF !important;
+}
+
+.heading {
+    margin-bottom: 3rem;
+    padding: 2rem 8rem;
+}
+
+.btn {
+    background-color: #8164FF;
+    color: #fff;
+}
+
+.post .nav-link {
+    padding-left: 0;
+    color: #212629;
+}
+
+footer {
+    color: #fff;
+    padding: 1rem 0;
+    background-color: #8164FF;
+}
