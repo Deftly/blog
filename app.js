@@ -3,12 +3,35 @@ const express = require("express");
 const path = require("path")
 const mongoose = require("mongoose");
 const ejs = require("ejs");
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
 
-const bcrypt = require("bcrypt");
-const saltRounds = 10;
+const app = express();
+
+app.set('view engine', 'ejs');
+app.set("views", path.join(__dirname, "views"));
+
+app.use(express.urlencoded({extended: true}));
+app.use(express.static(path.join(__dirname, "public/")));
+
+app.use(session({
+  secret: "I want to get a cat.",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 const Post = require("./models/post.js");
 const User = require("./models/user.js");
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 
 mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4cgyx.mongodb.net/blog?retryWrites=true&w=majority`, {
     useNewUrlParser: true,
@@ -16,15 +39,6 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cl
     useFindAndModify: true,
     useUnifiedTopology: true 
 });
-
-const app = express();
-
-
-app.set('view engine', 'ejs');
-app.set("views", path.join(__dirname, "views"));
-
-app.use(express.urlencoded({extended: true}));
-app.use(express.static(path.join(__dirname, "public/")));
   
 
 app.get("/", (req, res) => {
@@ -40,23 +54,18 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  User.findOne({username: username}, (err, found) => {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  })
+  req.logIn(user, (err) => {
     if(err) {
-      console.log(err)
+      console.log(err);
+      res.redirect("/login");
     } else {
-      if(found) {
-        bcrypt.compare(password, found.password, (err, result) => {
-          if(result) {
-            res.send("logged in.")
-          } else {
-            res.send("Username or password is incorrect");
-          }
-        });
-      } else {
-        res.send("Username or password is incorrect");
-      }
+      passport.authenticate("local")(req, res, async () => {
+        res.redirect("/");
+      });
     }
   })
 })
@@ -66,26 +75,33 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-    if(!err){
-      const user = new User({
-        username: req.body.username,
-        email: req.body.email,
-        password: hash
-      })
-      user.save((err) => {
-        if(err) {
-          console.log(err);
-        } else {
-          res.redirect("/")
-        }
-      });
-    }
-  });
+   User.register({
+     username: req.body.username, email: req.body.email}, req.body.password, (err, user) => {
+     if(err) {
+        console.log(err);
+        res.redirect("/register")
+     } else {
+       passport.authenticate("local")(req, res, () => {
+        res.redirect("/");
+       });
+     }
+   })
+})
+
+app.get("/loggedIn", (req, res) => {
+  if(req.isAuthenticated()) {
+    res.render("loggedIn.ejs");
+  } else {
+    res.redirect("/login");
+  }
 })
 
 app.get("/compose", (req, res) => {
-  res.render("compose.ejs");
+  if(req.isAuthenticated()) {
+    res.render("compose.ejs");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.post("/compose", (req, res) => {
@@ -107,6 +123,11 @@ app.get("/posts/:postId", (req, res) => {
     res.render("post.ejs", {post: post});
   })
 });
+
+app.get("/logout", (req, res) => {
+  req.logOut();
+  res.redirect("/");
+})
 
 app.get("*", (req, res) => {
   res.send("404 Page not found")
