@@ -4,6 +4,9 @@ const path = require("path")
 const mongoose = require("mongoose");
 const ejs = require("ejs");
 
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 const Post = require("./models/post.js");
 const User = require("./models/user.js");
 
@@ -44,11 +47,13 @@ app.post("/login", (req, res) => {
       console.log(err)
     } else {
       if(found) {
-        if(found.password === password) {
-          res.send("logged in.")
-        } else {
-          res.send("Username or password is incorrect");
-        }
+        bcrypt.compare(password, found.password, (err, result) => {
+          if(result) {
+            res.send("logged in.")
+          } else {
+            res.send("Username or password is incorrect");
+          }
+        });
       } else {
         res.send("Username or password is incorrect");
       }
@@ -61,17 +66,20 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const password = req.body.password
-  const user = new User({
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password
-  })
-  user.save((err) => {
-    if(err) {
-      console.log(err);
-    } else {
-      res.redirect("/")
+  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+    if(!err){
+      const user = new User({
+        username: req.body.username,
+        email: req.body.email,
+        password: hash
+      })
+      user.save((err) => {
+        if(err) {
+          console.log(err);
+        } else {
+          res.redirect("/")
+        }
+      });
     }
   });
 })
